@@ -23,6 +23,7 @@ def main():
   
   try:
     cloud = QingpingCloud(app_key, app_secret)
+    cloud.connect()
   except Exception as e:
     print(f"Error creating QingpingCloud: {e}")
     sys.exit(1)

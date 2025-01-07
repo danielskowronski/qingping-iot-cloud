@@ -1,14 +1,18 @@
 import requests
 import base64
 import time
+import logging
+
 from .QingpingDevice import QingpingDevice
 from .QingpingDeviceProperty import QingpingDeviceProperty
+
+_LOGGER = logging.getLogger(__name__)
 
 class QingpingCloud:
   OAUTH_TOKEN_URL = 'https://oauth.cleargrass.com/oauth2/token'
   API_URL_PREFIX = 'https://apis.cleargrass.com/v1/apis'
   
-  def get_token(self) -> str:
+  def get_token(self) -> str|None:
     encoded_auth=base64.b64encode((self.app_key+":"+self.app_secret).encode()).decode()
     token_request = requests.post(
       self.OAUTH_TOKEN_URL,
@@ -25,11 +29,9 @@ class QingpingCloud:
     token=None
     if token_request.ok:
       try:
-        token=token_request.json()["access_token"]
+        token=token_request.json().get("access_token", None)
       except Exception as e:
-        raise Exception(f"Error parsing token: {e}")
-    else:
-      raise Exception(f"Error getting token: {token_request.text}")
+        raise APIConnectionError(f"Error parsing token: {e}")
     self.token=token
     return token
   
@@ -52,9 +54,8 @@ class QingpingCloud:
       try:
         api_response=api_request.json()
       except Exception as e:
-        raise Exception(f"Error parsing data: {e}")
-    else:
-      raise Exception(f"Error getting data: {api_request.text}")
+        raise APIConnectionError(f"Error parsing data: {e}")
+      
     return api_response
   
   def get_devices(self) -> list[QingpingDevice]:
@@ -88,8 +89,25 @@ class QingpingCloud:
 
     return devices
   
+  def connect(self) -> bool:
+    if self.get_token():
+      self.connected=True
+      return True
+    else:
+      raise APIAuthError("Error getting token")
+  
+  def disconnect(self) -> bool:
+    self.connected=False
+    return True
+  
   def __init__(self, app_key, app_secret) -> None:
     self.app_key = app_key
     self.app_secret = app_secret
+    self.token = None
+    self.connected = False
     
-    self.get_token()
+class APIAuthError(Exception):
+    """Exception class for auth error."""
+
+class APIConnectionError(Exception):
+    """Exception class for connection error."""
