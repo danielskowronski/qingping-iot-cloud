@@ -53,7 +53,7 @@ class QingpingCloud:
       for property_name, property_data in raw_device["data"].items():
         data[property_name] = QingpingDeviceProperty(
           property=property_name,
-          value=property_data.get("value", float("nan")),
+          value=property_data.get("value", None),
           status=property_data.get("status", 0)
         )
       device = QingpingDevice(

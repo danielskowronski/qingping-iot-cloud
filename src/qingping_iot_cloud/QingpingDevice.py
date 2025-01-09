@@ -26,12 +26,12 @@ class QingpingDevice:
     elif property_name in QingpingDeviceProperty.DEV_PROP_SPEC:
       return QingpingDeviceProperty(
         property=property_name,
-        value=float("nan"),
+        value=None,
         status=0
       )
     else:
       return QingpingDeviceProperty(
         property="UNSUPPORTED",
-        value=float("nan"),
+        value=None,
         status=0
       )

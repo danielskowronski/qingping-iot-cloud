@@ -10,5 +10,6 @@
 - [ ] support device settings modification
 - [x] package and publish
 - [ ] improve CLI with proper level logging and error handling
-- [ ] review more precise data type for QingpingDeviceProperty
-- [ ] add unit conversion to QingpingDeviceProperty (temperature, ppb in tvoc, timestamp to human readable or seconds since now)
+- [-] review more precise data type for QingpingDeviceProperty -> float is enough
+- [x] add unit conversion to QingpingDeviceProperty (temperature, ppb in tvoc,
+- [x] timestamp to human readable or seconds since now) -> as part of get_ha_value
