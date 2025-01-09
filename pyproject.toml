@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "qingping_iot_cloud"
-version = "0.1.1"
+version = "0.2.0a1"
 authors = [
   { name="Daniel Skowronski" },
 ]
@@ -18,8 +18,8 @@ classifiers = [
 ]
 
 dependencies = [
-    "requests",
-    "argparse"
+    "requests~=2.32.3",
+    "requests-oauth2client~=1.6.0"
 ]
 
 [project.urls]

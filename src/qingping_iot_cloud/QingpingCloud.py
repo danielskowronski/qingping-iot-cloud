@@ -3,6 +3,9 @@ import base64
 import time
 import logging
 
+from requests_oauth2client import OAuth2Client, OAuth2ClientCredentialsAuth, ClientSecretBasic
+import requests_oauth2client
+
 from .QingpingDevice import QingpingDevice
 from .QingpingDeviceProperty import QingpingDeviceProperty
 
@@ -11,29 +14,6 @@ _LOGGER = logging.getLogger(__name__)
 class QingpingCloud:
   OAUTH_TOKEN_URL = 'https://oauth.cleargrass.com/oauth2/token'
   API_URL_PREFIX = 'https://apis.cleargrass.com/v1/apis'
-  
-  def get_token(self) -> str|None:
-    encoded_auth=base64.b64encode((self.app_key+":"+self.app_secret).encode()).decode()
-    token_request = requests.post(
-      self.OAUTH_TOKEN_URL,
-      data={ 
-        "grant_type": "client_credentials", 
-        "scope": "device_full_access"
-      },
-      headers={
-        "Content-Type": "application/x-www-form-urlencoded", 
-        "Authorization": f"Basic {encoded_auth}",
-        "Accept": "application/json"
-      }
-    )
-    token=None
-    if token_request.ok:
-      try:
-        token=token_request.json().get("access_token", None)
-      except Exception as e:
-        raise APIConnectionError(f"Error parsing token: {e}")
-    self.token=token
-    return token
   
   def _api_get(self, endpoint) -> dict:
     timestamp=int(time.time()*1000)
@@ -44,9 +24,7 @@ class QingpingCloud:
     
     api_request = requests.get(
       url,
-      headers={
-        "Authorization": f"Bearer {self.token}"
-      }
+      auth=self._auth
     )
     
     api_response=None
@@ -57,6 +35,13 @@ class QingpingCloud:
         raise APIConnectionError(f"Error parsing data: {e}")
       
     return api_response
+  
+  def get_token(self) -> str|None:
+    """ Helper only for CLI: get last auth token"""
+    if self._auth.token and not self._auth.token.is_expired():
+      return self._auth.token.access_token
+    else:
+      return None
   
   def get_devices(self) -> list[QingpingDevice]:
     api_response=self._api_get("devices")
@@ -90,21 +75,32 @@ class QingpingCloud:
     return devices
   
   def connect(self) -> bool:
-    if self.get_token():
-      self.connected=True
-      return True
-    else:
-      raise APIAuthError("Error getting token")
+    try:
+      self._auth.renew_token()
+    except requests_oauth2client.exceptions.InvalidClient as e:
+      raise APIAuthError(f"Error getting token ({e})")
+    except Exception as e:
+      raise APIConnectionError(f"Error connecting to API ({e})")
+    
+    return True
   
   def disconnect(self) -> bool:
-    self.connected=False
+    self._auth.forget_token()
     return True
   
   def __init__(self, app_key, app_secret) -> None:
-    self.app_key = app_key
-    self.app_secret = app_secret
-    self.token = None
-    self.connected = False
+    self._app_key = app_key
+    self._app_secret = app_secret
+    self._oauth2client = OAuth2Client(
+      token_endpoint=self.OAUTH_TOKEN_URL,
+      auth=ClientSecretBasic(self._app_key, self._app_secret)
+    )
+    self._auth = OAuth2ClientCredentialsAuth(
+      self._oauth2client, 
+      scope="device_full_access"
+    )
+
+    
     
 class APIAuthError(Exception):
     """Exception class for auth error."""
