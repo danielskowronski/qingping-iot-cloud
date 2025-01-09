@@ -4,7 +4,7 @@
 - [x] __main__ wrapper for CLI with env variables reading for credentials
 - [x] finalize docs
 - [x] parse response data into QingpingDevice and QingpingDeviceProperty classes
-- [ ] store token in ENV and attempt re-using known one
+- [x] store token in ENV and attempt re-using known one -> support autorenew and constructor with access token
 - [ ] support device history data
 - [ ] support device history event
 - [ ] support device settings modification

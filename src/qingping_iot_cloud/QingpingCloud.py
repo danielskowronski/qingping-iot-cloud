@@ -1,10 +1,9 @@
 import requests
-import base64
 import time
 import logging
+import requests_oauth2client
 
 from requests_oauth2client import OAuth2Client, OAuth2ClientCredentialsAuth, ClientSecretBasic
-import requests_oauth2client
 
 from .QingpingDevice import QingpingDevice
 from .QingpingDeviceProperty import QingpingDeviceProperty
@@ -27,18 +26,20 @@ class QingpingCloud:
       auth=self._auth
     )
     
-    api_response=None
+    api_response={}
     if api_request.ok:
       try:
         api_response=api_request.json()
       except Exception as e:
         raise APIConnectionError(f"Error parsing data: {e}")
+    else:
+      raise APIAuthError(f"Error getting data: {api_request.status_code}")
       
     return api_response
   
   def get_token(self) -> str|None:
-    """ Helper only for CLI: get last auth token"""
-    if self._auth.token and not self._auth.token.is_expired():
+    """ Helper only for CLI: get last auth token """
+    if self.is_connected():
       return self._auth.token.access_token
     else:
       return None
@@ -74,7 +75,10 @@ class QingpingCloud:
 
     return devices
   
-  def connect(self) -> bool:
+  def connect(self, force=False) -> bool:
+    if not force and self.is_connected():
+      return True
+    
     try:
       self._auth.renew_token()
     except requests_oauth2client.exceptions.InvalidClient as e:
@@ -88,7 +92,15 @@ class QingpingCloud:
     self._auth.forget_token()
     return True
   
-  def __init__(self, app_key, app_secret) -> None:
+  def is_token_expired(self) -> bool|None:
+    return self._auth.token.is_expired()
+  def is_connected(self) -> bool:
+    if self._auth.token and not self._auth.token.is_expired():
+      return True
+    else:
+      return False
+  
+  def __init__(self, app_key, app_secret, access_token=None) -> None:
     self._app_key = app_key
     self._app_secret = app_secret
     self._oauth2client = OAuth2Client(
@@ -97,11 +109,10 @@ class QingpingCloud:
     )
     self._auth = OAuth2ClientCredentialsAuth(
       self._oauth2client, 
-      scope="device_full_access"
+      scope="device_full_access",
+      token=access_token
     )
 
-    
-    
 class APIAuthError(Exception):
     """Exception class for auth error."""
 
