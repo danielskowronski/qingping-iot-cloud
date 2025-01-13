@@ -165,7 +165,7 @@ class QingpingDeviceProperty:
       return None
     
     if self.property == "timestamp":
-      return datetime.datetime.fromtimestamp(self.value).replace(tzinfo=datetime.timezone.utc)
+      return datetime.datetime.fromtimestamp(self.value).astimezone(tz=datetime.timezone.utc)
     elif self.property in ["tvoc_index","battery"]:
       return int(self.value)
     else:
