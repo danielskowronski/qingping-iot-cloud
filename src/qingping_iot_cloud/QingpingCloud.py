@@ -21,18 +21,25 @@ class QingpingCloud:
     else:
       url=f"{self.API_URL_PREFIX}/{endpoint}?timestamp={timestamp}"
     
+    _LOGGER.debug(f"API GET REQUEST URL: {url}")
+    
     api_request = requests.get(
       url,
       auth=self._auth
     )
+
+    _LOGGER.debug(f"API GET RESPONSE CODE: {api_request.status_code}")
     
     api_response={}
     if api_request.ok:
       try:
         api_response=api_request.json()
+        _LOGGER.debug(f"API GET RESPONSE JSON: {api_response}")
       except Exception as e:
+        _LOGGER.debug(f"API GET RESPONSE BODY: {api_request.text}")
         raise APIConnectionError(f"Error parsing data: {e}")
     else:
+      _LOGGER.debug(f"API GET RESPONSE BODY: {api_request.text}")
       raise APIAuthError(f"Error getting data: {api_request.status_code}")
       
     return api_response
@@ -77,10 +84,12 @@ class QingpingCloud:
   
   def connect(self, force=False) -> bool:
     if not force and self.is_connected():
+      _LOGGER.debug("Already connected")
       return True
     
     try:
       self._auth.renew_token()
+      _LOGGER.debug("Renewed token")
     except requests_oauth2client.exceptions.InvalidClient as e:
       raise APIAuthError(f"Error getting token ({e})")
     except Exception as e:

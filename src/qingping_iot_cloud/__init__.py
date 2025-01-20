@@ -5,7 +5,7 @@ import importlib.metadata
 from .QingpingCloud import QingpingCloud
 
 def main():
-  parser = argparse.ArgumentParser(description=f"Qingping IoT Cloud - {importlib.metadata.version("qingping_iot_cloud")}")
+  parser = argparse.ArgumentParser(description=f"Qingping IoT Cloud - {importlib.metadata.version('qingping_iot_cloud')}")
   parser.add_argument("action", 
     choices=[
       "get_token", 

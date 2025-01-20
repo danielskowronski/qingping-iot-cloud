@@ -75,7 +75,7 @@ class QingpingDeviceProperty:
     "pm10": {
       "ha_class": "pm10",
       "ha_title": "PM10",
-      "unit": "μg/m³", 
+      "unit": "µg/m³", 
       "desc": "PM10", 
       "status": {
         0: "sensor normal", 
@@ -86,7 +86,7 @@ class QingpingDeviceProperty:
     "pm50": {
       "ha_class": None,
       "ha_title": "PM5.0",
-      "unit": "μg/m³", 
+      "unit": "µg/m³", 
       "desc": "PM5.0", 
       "status": {
         0: "sensor normal", 
@@ -97,7 +97,7 @@ class QingpingDeviceProperty:
     "pm25": {
       "ha_class": "pm25",
       "ha_title": "PM2.5",
-      "unit": "μg/m³", 
+      "unit": "µg/m³", 
       "desc": "PM2.5", 
       "status": {
         0: "sensor normal", 
