@@ -66,8 +66,8 @@ class QingpingCloud:
       device = QingpingDevice(
         name=raw_device["info"]["name"],
         mac=raw_device["info"]["mac"],
-        group_id=raw_device["info"]["group_id"],
-        group_name=raw_device["info"]["group_name"],
+        group_id=raw_device["info"].get("group_id"),
+        group_name=raw_device["info"].get("group_name"),
         status_offline=raw_device["info"]["status"]["offline"],
         version=raw_device["info"]["version"],
         created_at=raw_device["info"]["created_at"],

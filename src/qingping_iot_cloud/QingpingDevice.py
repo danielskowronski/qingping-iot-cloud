@@ -1,4 +1,5 @@
 from dataclasses import dataclass
+from typing import Optional
 from .QingpingDeviceProperty import QingpingDeviceProperty
 
 @dataclass
@@ -6,8 +7,8 @@ class QingpingDevice:
   # following naming convention from https://developer.qingping.co/cloud-to-cloud/open-apis#13-device-list
   name: str
   mac: str
-  group_id: str
-  group_name: str
+  group_id: Optional[str]    # absent for devices that are not in a group
+  group_name: Optional[str]
   status_offline: bool
   version: str # firmware
   created_at: str
